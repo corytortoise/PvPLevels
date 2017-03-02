@@ -37,19 +37,14 @@
         public function addKill(Player $player) {
           $data = $this->getData($player->getName());
           $data->addKill();
-          //Thank you, StackOverflow. XD
           $maxlevel = max(array_keys($this->cfg->getAll()));
-          $player->sendMessage("Starting debug...");
           if($data->getLevel() >= $maxlevel) {
-            //Do nothing, because they have reached the highest level possible.
-            $player->sendMessage("greater than max");
             return;
           }
           elseif($data->getLevel() < $maxLevel) {
-            $player->sendMessage("less than max level");
             $level = $this->cfg->get($data->getLevel() + 1);
             if($data->getKills() == $level["kills"]) {
-              $player->sendMessage("Level up");
+              $player->sendPopup(C::GREEN . "Level up");
               $data->levelUp();
               foreach($level["commands"] as $command) {
                 $cmd = str_replace(["%p", "%k", "%d", "%kdr", "%l"], [$player->getName(), $data->getKills(), $data->getDeaths(), $data->getKdr(), $data->getLevel()], $command);
