@@ -1,0 +1,30 @@
+#Config File for PvPLevels
+---
+#Format:
+# Level Number:
+#   kills: number of kills required
+#   commands: commands to be run upon leveling up
+# Variables you can use:
+# %k = # of kills
+# %d = # of deaths
+# %p = Player name
+# %l = PvP Level
+# %kdr = Kills/Deaths ratio of player
+
+#Keep the config formatted correctly or you may get errors.
+# Make sure you don't skip levels.
+
+
+0:
+  kills: 0
+  #Leave this one blank
+1:
+  kills: 5
+  commands: 
+  - "say %p is now level 1"
+  - "give %p cookie 1"
+2: 
+  kills: 10
+  commands:
+  - "say %p got 10 kills"
+---
