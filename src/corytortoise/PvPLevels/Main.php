@@ -1,6 +1,6 @@
 <?php
 
-	namespace corytortoise\PvPLevels;
+   namespace corytortoise\PvPLevels;
 	
    use pocketmine\Player;
    use pocketmine\Server;
@@ -42,7 +42,7 @@
             return;
           }
           elseif($data->getLevel() < $maxLevel) {
-            $level = $this->cfg->get($data->getLevel() + 1);
+            $level = $this->cfg->getAll()[$data->getLevel() + 1];
             if($data->getKills() == $level["kills"]) {
               $player->sendPopup(C::GREEN . "Level up");
               $data->levelUp();
@@ -79,7 +79,7 @@
               $data = $this->getData($sender->getName());
               $name = $sender->getName();
             }
-            $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . "*************" . C::YELLOW . "* Player: " . $name . "\n" .  C::YELLOW . "* Level: " . $data->getLevel() . "\n" . C::YELLOW . "* Kills: " . $data->getKills() . "\n" . C::YELLOW . "* Deaths: " . $data->getDeaths() . "\n" .  C::YELLOW . "* K/D: " . $data->getKdr() . "\n" .  C::GREEN . "*************");
+            $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . "*************\n" . C::YELLOW . "* Player: " . $name . "\n" .  C::YELLOW . "* Level: " . $data->getLevel() . "\n" . C::YELLOW . "* Kills: " . $data->getKills() . "\n" . C::YELLOW . "* Deaths: " . $data->getDeaths() . "\n" .  C::YELLOW . "* K/D: " . $data->getKdr() . "\n" .  C::GREEN . "*************");
             return true;
           } else {
             $sender->sendMessage(C::RED . "Please run this command in-game");
