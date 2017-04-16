@@ -37,8 +37,8 @@
         public function addKill(Player $player) {
           $data = $this->getData($player->getName());
           $data->addKill();
-          $maxlevel = max(array_keys($this->cfg->getAll()));
-          if($data->getLevel() >= $maxlevel) {
+          $maxLevel = max(array_keys($this->cfg->getAll()));
+          if($data->getLevel() >= $maxLevel) {
             return;
           }
           elseif($data->getLevel() < $maxLevel) {
@@ -48,7 +48,7 @@
               $data->levelUp();
               foreach($level["commands"] as $command) {
                 $cmd = str_replace(["%p", "%k", "%d", "%kdr", "%l"], [$player->getName(), $data->getKills(), $data->getDeaths(), $data->getKdr(), $data->getLevel()], $command);
-                $this->getServer()->dispatchCommand($cmd);
+                $this->getServer()->dispatchCommand($player, $cmd);
               }
             }
           }
