@@ -1,7 +1,7 @@
 <?php
 
    namespace corytortoise\PvPLevels;
-	
+
    use pocketmine\Player;
    use pocketmine\Server;
    use pocketmine\plugin\PluginBase;
@@ -18,12 +18,12 @@
 
    use corytortoise\PvPLevels\EventListener;
    use corytortoise\PvPLevels\PlayerData;
-	
+
 	  class Main extends PluginBase {
 
       private $cfg;
       private $playerData = array();
-		
+
       public function onEnable() {
             $this->saveDefaultConfig();
             $this->reloadConfig();
@@ -59,12 +59,12 @@
           $this->getData($player->getName())->addDeath();
           return;
         }
-  
+
         public function getData($name) {
           return new PlayerData($this, $name);
         }
 
-        public function onCommand(CommandSender $sender, Command $command, $label, array $args) {
+        public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool {
           if(strtolower($command->getName()) == "pvpstats") {
             if($sender instanceof Player) {
               if(isset($args[0])) {
