@@ -6,7 +6,7 @@
   use pocketmine\utils\Config;
 
   use corytortoise\PvPLevels\Main;
-  
+
     class PlayerData {
 
       private $plugin;
@@ -46,7 +46,12 @@
     }
 
     public function getKdr() {
-      return $this->kills / $this->deaths;
+      if ($this->kills > 0){
+        return $this->kills / $this->deaths;
+      }
+      else{
+        return 0;
+      }
     }
 
     public function getLevel() {
