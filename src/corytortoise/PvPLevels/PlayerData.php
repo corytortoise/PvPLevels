@@ -46,11 +46,11 @@
     }
 
     public function getKdr() {
-      if ($this->kills > 0){
+      if ($this->deaths > 0){
         return $this->kills / $this->deaths;
       }
       else{
-        return 0;
+        return $this->kills;
       }
     }
 
