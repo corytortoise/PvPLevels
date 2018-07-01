@@ -36,7 +36,7 @@ class Main extends PluginBase {
     }
 
     public function addKill(Player $player) {
-        $data = $this->getData($player->getName());$data = $this->getData($player->getName());
+        $data = $this->getData($player->getName());
         $data->addKill();
         $maxLevel = max(array_keys($this->cfg->getAll()));
         if($data->getLevel() >= $maxLevel) {
