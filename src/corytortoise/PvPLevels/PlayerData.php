@@ -12,6 +12,7 @@ class PlayerData {
     private $plugin;
     private $player = null;
     private $kills = 0;
+    private $killStreak = 0;
     private $level = 0;
     private $deaths = 0;
 
@@ -22,6 +23,7 @@ class PlayerData {
         if(is_file($path)) {
             $data = yaml_parse_file($path);
             $this->kills = $data["kills"];
+            $this->killStreak = $data["killstreak"];
             $this->deaths = $data["deaths"];
             $this->level = $data["level"];
         } else {
@@ -39,6 +41,10 @@ class PlayerData {
 
     public function getKills() {
         return $this->kills;
+    }
+    
+    public function getKillStreak() {
+        return $this->killStreak;
     }
 
     public function getDeaths() {
@@ -59,11 +65,13 @@ class PlayerData {
 
     public function addKill() {
         $this->kills++;
+        $this->killStreak++;
         $this->save();
     }
 
     public function addDeath() {
         $this->deaths++;
+        $this->killStreak = 0;
         $this->save();
     }
 
@@ -77,7 +85,7 @@ class PlayerData {
     }
 
     public function save() {
-        yaml_emit_file($this->getPath(), ["name" => $this->player, "kills" => $this->kills, "deaths" => $this->deaths, "level" => $this->level]);
+        yaml_emit_file($this->getPath(), ["name" => $this->player, "kills" => $this->kills, "killstreak" => $this->killStreak, "deaths" => $this->deaths, "level" => $this->level]);
     }
 
 }

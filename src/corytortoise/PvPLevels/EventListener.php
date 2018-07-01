@@ -22,7 +22,7 @@ class EventListener implements Listener {
         $cause = $e->getPlayer()->getLastDamageCause();
         if($cause instanceof EntityDamageByEntityEvent) {
             if($cause->getDamager() instanceof Player) {
-                $this->plugin->addKill($cause->getDamager());
+                $this->plugin->addKill($cause->getDamager(), $v);
             }
         }
     }

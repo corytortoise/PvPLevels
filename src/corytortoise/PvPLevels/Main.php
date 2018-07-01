@@ -35,8 +35,8 @@ class Main extends PluginBase {
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->cfg->getAll())) . " levels loaded!");
     }
 
-    public function addKill(Player $player) {
-        $data = $this->getData($player->getName());$data = $this->getData($player->getName());
+    public function addKill(Player $player, Player $v) {
+        $data = $this->getData($player->getName());
         $data->addKill();
         $maxLevel = max(array_keys($this->cfg->getAll()));
         if($data->getLevel() >= $maxLevel) {
