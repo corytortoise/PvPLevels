@@ -43,7 +43,7 @@ class PlayerData {
         return $this->kills;
     }
     
-    public function getKillStreak() {
+    public function getStreak() {
         return $this->killStreak;
     }
 

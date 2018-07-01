@@ -15,16 +15,22 @@ class EventListener implements Listener {
     public function __construct(Main $plugin) {
         $this->plugin = $plugin;
     }
-
+    
+    /**
+     * 
+     * @param PlayerDeathEvent $e
+     * 
+     */
     public function onDeath(PlayerDeathEvent $e) {
         $v = $e->getPlayer();
-        $this->plugin->addDeath($v);
         $cause = $e->getPlayer()->getLastDamageCause();
         if($cause instanceof EntityDamageByEntityEvent) {
             if($cause->getDamager() instanceof Player) {
-                $this->plugin->addKill($cause->getDamager(), $v);
+                $this->plugin->addKill($cause->getDamager());
+                $this->plugin->handleStreak($cause->getDamager(), $v);
             }
         }
+        $this->plugin->addDeath($v);
     }
 
 }
