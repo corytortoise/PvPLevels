@@ -6,6 +6,7 @@
 #   commands: commands to be run upon leveling up
 # Variables you can use:
 # %k = # of kills
+# %s = Kill streak
 # %d = # of deaths
 # %p = Player name
 # %l = PvP Level
