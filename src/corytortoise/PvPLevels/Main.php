@@ -13,6 +13,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\item\Item;
+use pocketmine\level\Location;
 
 //PvPLevels files
 
@@ -29,10 +30,20 @@ class Main extends PluginBase {
         $this->reloadConfig();
         @mkdir($this->getDataFolder());
         @mkdir($this->getDataFolder() . "players/");
+        @fopen($this->getDataFolder() . "FloatingText.yml");
         $this->cfg = $this->getConfig();
         $listener = new EventListener($this);
         $this->getServer()->getPluginManager()->registerEvents($listener, $this);
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->cfg->getAll())) . " levels loaded!");
+    }
+    
+    /**
+     * Initializes Floating Texts.
+     * @param string $type
+     * @param Location $location
+     */
+    public function createText(string $type = "levels", Location $location) {
+        
     }
 
     public function addKill(Player $player) {
@@ -61,12 +72,12 @@ class Main extends PluginBase {
         $loser = $this->getData($v->getName());
         $oldStreak = $loser->getStreak();
         if($oldStreak >= 5) {
-            $v->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] " . C::YELLOW . "Your " . $oldStreak . "killstreak was ended by" . $player->getName() . "!");
-            $player->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] " . C::YELLOW . "You have ended " . $v->getName() . "'s" . $oldStreak . "killstreak!");
+            $v->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] " . C::YELLOW . "Your " . $oldStreak . " killstreak was ended by " . $player->getName() . "!");
+            $player->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] " . C::YELLOW . "You have ended " . $v->getName() . "'s " . $oldStreak . " killstreak!");
         }
         $newStreak = $killer->getStreak();
         if(is_int($newStreak / 5)) {
-            $this->getServer()->broadcastMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] " . C::YELLOW . $player->getName() . "is on a " . $newStreak . "killstreak!");
+            $this->getServer()->broadcastMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] " . C::YELLOW . $player->getName() . " is on a " . $newStreak . " killstreak!");
         }
     }
 
@@ -95,7 +106,7 @@ class Main extends PluginBase {
                     $data = $this->getData($sender->getName());
                     $name = $sender->getName();
                 }
-                $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . "*************\n" . C::YELLOW . "* Player: " . $name . "\n" .  C::YELLOW . "* Level: " . $data->getLevel() . "\n" . C::YELLOW . "* Kills: " . $data->getKills() . "\n" . C::YELLOW . "* Kills: " . $data->getStreak() . "/n" . C::YELLOW . "* Deaths: " . $data->getDeaths() . "\n" .  C::YELLOW . "* K/D: " . $data->getKdr() . "\n" .  C::GREEN . "*************");
+                $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . "*************\n" . C::YELLOW . "* Player: " . $name . "\n" .  C::YELLOW . "* Level: " . $data->getLevel() . "\n" . C::YELLOW . "* Kills: " . $data->getKills() . "\n" . C::YELLOW . "* Killstreak: " . $data->getStreak() . "\n" . C::YELLOW . "* Deaths: " . $data->getDeaths() . "\n" .  C::YELLOW . "* K/D: " . $data->getKdr() . "\n" .  C::GREEN . "*************");
                 return true;
                 } else {
                     $sender->sendMessage(C::RED . "Please run this command in-game");
