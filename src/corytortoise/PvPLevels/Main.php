@@ -13,7 +13,8 @@ use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
 use pocketmine\command\ConsoleCommandSender;
 use pocketmine\item\Item;
-use pocketmine\level\Location;
+use pocketmine\math\Vector3;
+use pocketmine\level\particle\FloatingTextParticle;
 
 //PvPLevels files
 
@@ -23,6 +24,7 @@ use corytortoise\PvPLevels\PlayerData;
 class Main extends PluginBase {
 
     private $cfg;
+    private $texts;
     private $playerData = array();
 
     public function onEnable() {
@@ -30,22 +32,33 @@ class Main extends PluginBase {
         $this->reloadConfig();
         @mkdir($this->getDataFolder());
         @mkdir($this->getDataFolder() . "players/");
-        @fopen($this->getDataFolder() . "FloatingText.yml");
         $this->cfg = $this->getConfig();
+        $this->texts = new Config($this->getDataFolder() . "texts.yml", Config::YAML);
+        foreach($this->texts->getAll() as $loc => $type) {
+            $pos = explode($loc, ":");
+            $v3 = new Vector3((int) $pos[0], (int) $pos[1], (int) $pos[2]);
+            $this->createText($type, $v3);
+        }
         $listener = new EventListener($this);
         $this->getServer()->getPluginManager()->registerEvents($listener, $this);
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->cfg->getAll())) . " levels loaded!");
+        $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
     }
     
     /**
      * Initializes Floating Texts.
      * @param string $type
-     * @param Location $location
+     * @param Vector3 $location
      */
-    public function createText(string $type = "levels", Location $location) {
-        
+    public function createText(string $type = "levels", Vector3 $location) {
+        $typetitle = $this->colorize($this->texts->get($type)["title"]);
+        $this->getServer()->getLevelByName($this->texts->get("world"))->addParticle(new FloatingTextParticle($location, $typetitle, $this->getRankings($type)));
     }
 
+    /**
+     * Adds a kill to stats, and checks for a levelup.
+     * @param Player $player
+     */
     public function addKill(Player $player) {
         $data = $this->getData($player->getName());
         $data->addKill();
@@ -67,6 +80,11 @@ class Main extends PluginBase {
     }
     
     //TODO: Add Custom KillStreak messages and commands.
+    /**
+     * Handles killstreaks and streak breaks.
+     * @param Player $player
+     * @param Player $v
+     */
     public function handleStreak(Player $player, Player $v) {
         $killer = $this->getData($player->getName());
         $loser = $this->getData($v->getName());
@@ -81,15 +99,32 @@ class Main extends PluginBase {
         }
     }
 
+    /**
+     * Adds a death to stats.
+     * @param Player $player
+     */
     public function addDeath(Player $player) {
         $this->getData($player->getName())->addDeath();
         return;
     }
 
+    /**
+     * Returns the PlayerData object for a player.
+     * @param type $name
+     * @return PlayerData
+     */
     public function getData($name) {
         return new PlayerData($this, $name);
     }
 
+    /**
+     * 
+     * @param CommandSender $sender
+     * @param Command $command
+     * @param string $label
+     * @param array $args
+     * @return bool
+     */
     public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool {
         if(strtolower($command->getName()) == "pvpstats") {
             if($sender instanceof Player) {
@@ -108,10 +143,34 @@ class Main extends PluginBase {
                 }
                 $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . "*************\n" . C::YELLOW . "* Player: " . $name . "\n" .  C::YELLOW . "* Level: " . $data->getLevel() . "\n" . C::YELLOW . "* Kills: " . $data->getKills() . "\n" . C::YELLOW . "* Killstreak: " . $data->getStreak() . "\n" . C::YELLOW . "* Deaths: " . $data->getDeaths() . "\n" .  C::YELLOW . "* K/D: " . $data->getKdr() . "\n" .  C::GREEN . "*************");
                 return true;
-                } else {
-                    $sender->sendMessage(C::RED . "Please run this command in-game");
-                    return true;
+            } else {
+                $sender->sendMessage(C::RED . "Please run this command in-game");
+                return true;
+            }
+        }
+        if(strtolower($command->getName()) == "pvptext") {
+            if($sender instanceof Player) {
+                if(isset($args[0])) {
+                    if(in_array($args, ["levels", "kills", "kdr", "streaks"])) {
+                        $v3 = $sender->getX() . ":" . $sender->getY() + 1 . ":" . $sender->getZ();
+                        $this->texts->set($v3, $args[0]);
+                        $this->createText($args[0], $v3);
+                        $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . $args[0] . " leaderboard created!");
+                    }
                 }
             }
         }
     }
+    
+    //TODO: Use Color class instead of str_replace.
+    /**
+     * 
+     * @param string $text
+     * @return type
+     */
+    public function colorize(string $text) {
+        $newText = str_replace("&", "§", $text);
+        return $newText;
+    }
+    
+}

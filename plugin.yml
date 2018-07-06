@@ -9,3 +9,7 @@ commands:
   pvpstats:
     description: Shows PvP Statistics
     usage: /pvpstats [player]
+  pvptext:
+    description: Creates a floating text leaderboard for PvP Stats at your location.
+    usage: /pvptext <levels | kills | kdr | streaks>
+    permission: pvplevels.pvptext
