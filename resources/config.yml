@@ -11,6 +11,8 @@ texts:
   kills: "&b< Kills Leaderboard >"
   kdr: "&b< K/D Ratio Leaderboard >"
   streaks: "&b< Top Killstreaks >"
+#Top X rankings. If you put 5, only the top 5 will be shown. 10 will result in top 10, etc.
+  top: 5
 
 #Format:
 # Level Number:

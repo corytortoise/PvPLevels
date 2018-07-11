@@ -3,16 +3,12 @@
 namespace corytortoise\PvPLevels;
 
 use pocketmine\Player;
-use pocketmine\Server;
 use pocketmine\plugin\PluginBase;
-use pocketmine\scheduler\ServerScheduler;
-use pocketmine\scheduler\PluginTask;
 use pocketmine\utils\TextFormat as C;
 use pocketmine\utils\Config;
 use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
 use pocketmine\command\ConsoleCommandSender;
-use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\level\particle\FloatingTextParticle;
 
@@ -25,7 +21,8 @@ class Main extends PluginBase {
 
     private $cfg;
     private $texts;
-    private $playerData = array();
+    private $playerData = [];
+    private $particles = [];
 
     public function onEnable() {
         $this->saveDefaultConfig();
@@ -34,25 +31,33 @@ class Main extends PluginBase {
         @mkdir($this->getDataFolder() . "players/");
         $this->cfg = $this->getConfig();
         $this->texts = new Config($this->getDataFolder() . "texts.yml", Config::YAML);
-        foreach($this->texts->getAll() as $loc => $type) {
-            $pos = explode($loc, ":");
-            $v3 = new Vector3((int) $pos[0], (int) $pos[1], (int) $pos[2]);
-            $this->createText($type, $v3);
-        }
         $listener = new EventListener($this);
         $this->getServer()->getPluginManager()->registerEvents($listener, $this);
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->cfg->getAll())) . " levels loaded!");
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
     }
-    
+
+    public function joinText(string $name) {
+        foreach($this->texts->getAll() as $loc => $type) {
+        $pos = explode($loc, ":");
+            if(isset($pos[1])) {
+                $v3 = new Vector3($pos[0], $pos[1], $pos[2]);
+                $this->createText($v3, $type, [$this->getServer()->getPlayerExact($name)]);
+            }
+        }
+    }
+
     /**
      * Initializes Floating Texts.
-     * @param string $type
      * @param Vector3 $location
+     * @param string $type
+     * @param array $players
      */
-    public function createText(string $type = "levels", Vector3 $location) {
-        $typetitle = $this->colorize($this->texts->get($type)["title"]);
-        $this->getServer()->getLevelByName($this->texts->get("world"))->addParticle(new FloatingTextParticle($location, $typetitle, $this->getRankings($type)));
+    public function createText(Vector3 $location, string $type = "levels", $players = null) {
+        $typetitle = $this->colorize($this->getConfig()->get("texts")[$type]);
+        $id = implode(":", [$location->getX(), $location->getY(), $location->getZ()]);
+        $this->getServer()->getLevelByName($this->getConfig()->get("texts")["world"])->addParticle($particle = new FloatingTextParticle($location, C::GOLD . "<<<<<>>>>>", $typetitle . "\n" . $this->getRankings($type)), $players);
+        $this->particles[$id] = $particle;
     }
 
     /**
@@ -78,7 +83,7 @@ class Main extends PluginBase {
             }
         }
     }
-    
+
     //TODO: Add Custom KillStreak messages and commands.
     /**
      * Handles killstreaks and streak breaks.
@@ -118,7 +123,7 @@ class Main extends PluginBase {
     }
 
     /**
-     * 
+     *
      * @param CommandSender $sender
      * @param Command $command
      * @param string $label
@@ -151,20 +156,104 @@ class Main extends PluginBase {
         if(strtolower($command->getName()) == "pvptext") {
             if($sender instanceof Player) {
                 if(isset($args[0])) {
-                    if(in_array($args, ["levels", "kills", "kdr", "streaks"])) {
-                        $v3 = $sender->getX() . ":" . $sender->getY() + 1 . ":" . $sender->getZ();
+                    if(in_array($args[0], ["levels", "kills", "kdr", "streaks"])) {
+                        $v3 = implode(":", [$sender->getX(), $sender->getY() + 1, $sender->getZ()]);
                         $this->texts->set($v3, $args[0]);
-                        $this->createText($args[0], $v3);
+                        $this->texts->save();
+                        $v3 = $sender->asVector3();
+                        $this->createText($v3, $args[0], null);
                         $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . $args[0] . " leaderboard created!");
+                        return true;
+                    } elseif(in_array($args[0], ["del", "remove", "delete"])) {
+                        if($text = $this->isNearText($sender) != false) {
+                            $this->particles[$text]->setInvisible();
+                            $this->texts->remove($text);
+                            $this->texts->save();
+                            unset($this->particles[$text]);
+                            $sender->sendMessage(C::GOLD . "Floating Text removed.");
+                            return true;
+                        } else {
+                            $sender->sendMessage(C::RED . "Floating Text not found.");
+                            return true;
+                        }
+                    } else {
+                        $sender->sendMessage(C::RED . "Please define what type of text you want, e.g. \"kills\", \"levels\", \"kdr\", \"streaks\", or \"delete\"");
+                        return true;
                     }
+                } else {
+                    $sender->sendMessage(C::RED . "Please define what type of text you want, e.g. \"kills\", \"levels\", \"kdr\", \"streaks\", or \"delete\"");
+                    return true;
+                }
+            } else {
+                $sender->sendMessage(C::RED . "Please run this command in-game");
+                return true;
+            }
+        }
+        return true;
+    }
+
+    public function isNearText($player) {
+        foreach($this->texts->getAll() as $loc => $type) {
+            var_dump($loc);
+            var_dump($type);
+            $v3 = explode(":", $loc);
+            if(isset($v3[1])) {
+                $text = new Vector3($v3[0], $v3[1], $v3[2]);
+                if(var_dump($player->distance($text)) <= 25) {
+                    return $loc;
                 }
             }
         }
+        return false;
     }
-    
+
+    public function getRankings(string $type) {
+        $files = scandir($this->getDataFolder() . "players/");
+        $stats = [];
+        switch($type) {
+            case "levels":
+                $string = "level";
+                break;
+            case "kills":
+                $string = "kills";
+                break;
+            case "kdr":
+                $string = "kdr";
+                break;
+            case "streaks":
+                $string = "killstreak";
+                break;
+            default:
+                break;
+        }
+        foreach($files as $file) {
+            if(pathinfo($file, PATHINFO_EXTENSION) == "yml") {
+                $yaml = file_get_contents($this->getDataFolder() . "players/" . $file);
+                $rawData = yaml_parse($yaml);
+                $stats[$rawData["name"]] = $rawData[$string];
+            }
+        }
+        arsort($stats, SORT_NUMERIC);
+        $finalRankings = "";
+        foreach($stats as $name => $number) {
+            var_dump($name);
+            var_dump($number);
+            $i = 1;
+            $finalRankings .= C::YELLOW . $i . ".) " . $name . ": " . $number . "\n";
+            if($i > $this->getConfig()->get("texts")["top"]) {
+                return $finalRankings;
+            }
+            if(count($stats) >= $i) {
+                return $finalRankings;
+            }
+            $i++;
+        }
+        return "";
+    }
+
     //TODO: Use Color class instead of str_replace.
     /**
-     * 
+     *
      * @param string $text
      * @return type
      */
@@ -172,5 +261,5 @@ class Main extends PluginBase {
         $newText = str_replace("&", "§", $text);
         return $newText;
     }
-    
+
 }

@@ -2,9 +2,6 @@
 
 namespace corytortoise\PvPLevels;
 
-use pocketmine\Player;
-use pocketmine\utils\Config;
-
 use corytortoise\PvPLevels\Main;
 
 class PlayerData {
@@ -13,6 +10,7 @@ class PlayerData {
     private $player = null;
     private $kills = 0;
     private $killStreak = 0;
+    private $kdr = 0;
     private $level = 0;
     private $deaths = 0;
 
@@ -24,6 +22,7 @@ class PlayerData {
             $data = yaml_parse_file($path);
             $this->kills = $data["kills"];
             $this->killStreak = $data["killstreak"];
+            $this->kdr = $data["kdr"];
             $this->deaths = $data["deaths"];
             $this->level = $data["level"];
         } else {
@@ -55,7 +54,7 @@ class PlayerData {
         if ($this->deaths > 0){
             return $this->kills / $this->deaths;
         } else {
-            return $this->kills;
+            return 1;
         }
     }
 
@@ -85,7 +84,7 @@ class PlayerData {
     }
 
     public function save() {
-        yaml_emit_file($this->getPath(), ["name" => $this->player, "kills" => $this->kills, "killstreak" => $this->killStreak, "deaths" => $this->deaths, "level" => $this->level]);
+        yaml_emit_file($this->getPath(), ["name" => $this->player, "kills" => $this->kills, "killstreak" => $this->killStreak, "kdr" => $this->getKdr(), "deaths" => $this->deaths, "level" => $this->level]);
     }
 
 }
