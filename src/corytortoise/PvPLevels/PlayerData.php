@@ -15,6 +15,7 @@ class PlayerData {
     private $killStreak = 0;
     private $level = 0;
     private $deaths = 0;
+    private $data = null;
 
     public function __construct(Main $plugin, $player){
         $this->plugin = $plugin;
@@ -22,8 +23,13 @@ class PlayerData {
         $path = $this->getPath();
         if(is_file($path)) {
             $data = yaml_parse_file($path);
+            $this->data = $data;
             $this->kills = $data["kills"];
-            $this->killStreak = $data["killstreak"];
+            if(isset($data["killstreak"])) {
+                $this->killStreak = $data["killstreak"];
+            } else {
+                $this->killStreak = 0;
+            }
             $this->deaths = $data["deaths"];
             $this->level = $data["level"];
         } else {
@@ -42,7 +48,7 @@ class PlayerData {
     public function getKills() {
         return $this->kills;
     }
-    
+
     public function getStreak() {
         return $this->killStreak;
     }
