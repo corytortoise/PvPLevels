@@ -18,7 +18,7 @@ class EventListener implements Listener {
     }
 
     public function onJoin(PlayerJoinEvent $e) {
-        $this->plugin->joinText($e->getPlayer()->getName());
+        $this->plugin->startTimer($e->getPlayer()->getName());
     }
 
     /**

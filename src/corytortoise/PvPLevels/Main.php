@@ -37,6 +37,11 @@ class Main extends PluginBase {
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
     }
 
+    public function startTimer(string $player) {
+        $task = new TimerTask($this, $player);
+        $this->getScheduler()->scheduleDelayedTask($task, 20 * 5);
+    }
+
     public function joinText(string $name) {
         foreach($this->texts->getAll() as $loc => $type) {
         $pos = explode($loc, ":");
