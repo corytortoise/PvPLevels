@@ -37,11 +37,6 @@ class Main extends PluginBase {
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
     }
 
-    public function startTimer(string $player) {
-        $task = new TimerTask($this, $player);
-        $this->getScheduler()->scheduleDelayedTask($task, 20 * 5);
-    }
-
     public function joinText(string $name) {
         foreach($this->texts->getAll() as $loc => $type) {
         $pos = explode($loc, ":");
@@ -61,7 +56,7 @@ class Main extends PluginBase {
     public function createText(Vector3 $location, string $type = "levels", $players = null) {
         $typetitle = $this->colorize($this->getConfig()->get("texts")[$type]);
         $id = implode(":", [$location->getX(), $location->getY(), $location->getZ()]);
-        $this->getServer()->getLevelByName($this->getConfig()->get("texts")["world"])->addParticle($particle = new FloatingTextParticle($location, C::GOLD . "<<<<<>>>>>", $typetitle . "\n" . $this->getRankings($type)), $players);
+        $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addParticle($particle = new FloatingTextParticle($location, C::GOLD . "<<<<<>>>>>", $typetitle . "\n" . $this->getRankings($type)), $players);
         $this->particles[$id] = $particle;
     }
 
@@ -170,8 +165,10 @@ class Main extends PluginBase {
                         $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . $args[0] . " leaderboard created!");
                         return true;
                     } elseif(in_array($args[0], ["del", "remove", "delete"])) {
-                        if($text = $this->isNearText($sender) != false) {
+                        $text = $this->isNearText($player);
+                        if($this->particles[$text] instanceof FloatingText) {
                             $this->particles[$text]->setInvisible();
+                            $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addFloatingText($this->particles[$text], [$sender]);
                             $this->texts->remove($text);
                             $this->texts->save();
                             unset($this->particles[$text]);
@@ -204,7 +201,7 @@ class Main extends PluginBase {
             $v3 = explode(":", $loc);
             if(isset($v3[1])) {
                 $text = new Vector3($v3[0], $v3[1], $v3[2]);
-                if(var_dump($player->distance($text)) <= 25) {
+                if(var_dump($player->distance($text)) <= 5) {
                     return $loc;
                 }
             }
@@ -215,6 +212,7 @@ class Main extends PluginBase {
     public function getRankings(string $type) {
         $files = scandir($this->getDataFolder() . "players/");
         $stats = [];
+        //Maybe just use str_replace instead?
         switch($type) {
             case "levels":
                 $string = "level";

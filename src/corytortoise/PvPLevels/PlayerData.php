@@ -21,8 +21,16 @@ class PlayerData {
         if(is_file($path)) {
             $data = yaml_parse_file($path);
             $this->kills = $data["kills"];
-            $this->killStreak = $data["killstreak"];
-            $this->kdr = $data["kdr"];
+            if(isset($data["killstreak"])) {
+                $this->killStreak = $data["killstreak"];
+            } else {
+                $this->killStreak = 0;
+            }
+            if(isset($data["kdr"])) {
+                $this->kdr = $data["kdr"];
+            } else {
+                $this->kdr = 0;
+            }
             $this->deaths = $data["deaths"];
             $this->level = $data["level"];
         } else {
@@ -41,7 +49,7 @@ class PlayerData {
     public function getKills() {
         return $this->kills;
     }
-    
+
     public function getStreak() {
         return $this->killStreak;
     }
