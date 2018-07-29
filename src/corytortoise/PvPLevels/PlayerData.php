@@ -13,6 +13,7 @@ class PlayerData {
     private $kdr = 0;
     private $level = 0;
     private $deaths = 0;
+    private $data = null;
 
     public function __construct(Main $plugin, $player){
         $this->plugin = $plugin;
@@ -20,6 +21,7 @@ class PlayerData {
         $path = $this->getPath();
         if(is_file($path)) {
             $data = yaml_parse_file($path);
+            $this->data = $data;
             $this->kills = $data["kills"];
             if(isset($data["killstreak"])) {
                 $this->killStreak = $data["killstreak"];
