@@ -16,6 +16,7 @@ use pocketmine\level\particle\FloatingTextParticle;
 
 use corytortoise\PvPLevels\EventListener;
 use corytortoise\PvPLevels\PlayerData;
+use corytortoise\PvPLevels\JoinTask;
 
 class Main extends PluginBase {
 
@@ -37,9 +38,13 @@ class Main extends PluginBase {
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
     }
 
+    public function joinTimer(string $name) {
+
+    }
+
     public function joinText(string $name) {
         foreach($this->texts->getAll() as $loc => $type) {
-        $pos = explode($loc, ":");
+        $pos = explode("_", $loc);
             if(isset($pos[1])) {
                 $v3 = new Vector3($pos[0], $pos[1], $pos[2]);
                 $this->createText($v3, $type, [$this->getServer()->getPlayerExact($name)]);
@@ -55,7 +60,7 @@ class Main extends PluginBase {
      */
     public function createText(Vector3 $location, string $type = "levels", $players = null) {
         $typetitle = $this->colorize($this->getConfig()->get("texts")[$type]);
-        $id = implode(":", [$location->getX(), $location->getY(), $location->getZ()]);
+        $id = implode("_", [$location->getX(), $location->getY(), $location->getZ()]);
         $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addParticle($particle = new FloatingTextParticle($location, C::GOLD . "<<<<<>>>>>", $typetitle . "\n" . $this->getRankings($type)), $players);
         $this->particles[$id] = $particle;
     }
@@ -157,7 +162,7 @@ class Main extends PluginBase {
             if($sender instanceof Player) {
                 if(isset($args[0])) {
                     if(in_array($args[0], ["levels", "kills", "kdr", "streaks"])) {
-                        $v3 = implode(":", [$sender->getX(), $sender->getY() + 1, $sender->getZ()]);
+                        $v3 = implode("_", [round($sender->getX()), round($sender->getY()) + 1, round($sender->getZ())]);
                         $this->texts->set($v3, $args[0]);
                         $this->texts->save();
                         $v3 = $sender->asVector3();
@@ -165,10 +170,10 @@ class Main extends PluginBase {
                         $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . $args[0] . " leaderboard created!");
                         return true;
                     } elseif(in_array($args[0], ["del", "remove", "delete"])) {
-                        $text = $this->isNearText($player);
-                        if($this->particles[$text] instanceof FloatingText) {
+                        $text = $this->isNearText($sender);
+                        if($this->particles[$text] instanceof FloatingTextParticle) {
                             $this->particles[$text]->setInvisible();
-                            $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addFloatingText($this->particles[$text], [$sender]);
+                            $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addParticle($this->particles[$text], [$sender]);
                             $this->texts->remove($text);
                             $this->texts->save();
                             unset($this->particles[$text]);
@@ -196,12 +201,10 @@ class Main extends PluginBase {
 
     public function isNearText($player) {
         foreach($this->texts->getAll() as $loc => $type) {
-            var_dump($loc);
-            var_dump($type);
-            $v3 = explode(":", $loc);
+            $v3 = explode("_", $loc);
             if(isset($v3[1])) {
                 $text = new Vector3($v3[0], $v3[1], $v3[2]);
-                if(var_dump($player->distance($text)) <= 5) {
+                if($player->distance($text) <= 5) {
                     return $loc;
                 }
             }
@@ -233,20 +236,20 @@ class Main extends PluginBase {
             if(pathinfo($file, PATHINFO_EXTENSION) == "yml") {
                 $yaml = file_get_contents($this->getDataFolder() . "players/" . $file);
                 $rawData = yaml_parse($yaml);
-                $stats[$rawData["name"]] = $rawData[$string];
+                if(isset($rawData[$string])) {
+                    $stats[$rawData["name"]] = $rawData[$string];
+                }
             }
         }
         arsort($stats, SORT_NUMERIC);
         $finalRankings = "";
+        $i = 1;
         foreach($stats as $name => $number) {
-            var_dump($name);
-            var_dump($number);
-            $i = 1;
             $finalRankings .= C::YELLOW . $i . ".) " . $name . ": " . $number . "\n";
             if($i > $this->getConfig()->get("texts")["top"]) {
                 return $finalRankings;
             }
-            if(count($stats) >= $i) {
+            if(count($stats) <= $i) {
                 return $finalRankings;
             }
             $i++;
