@@ -16,7 +16,6 @@ use pocketmine\level\particle\FloatingTextParticle;
 
 use corytortoise\PvPLevels\EventListener;
 use corytortoise\PvPLevels\PlayerData;
-use corytortoise\PvPLevels\JoinTask;
 
 class Main extends PluginBase {
 
@@ -36,10 +35,6 @@ class Main extends PluginBase {
         $this->getServer()->getPluginManager()->registerEvents($listener, $this);
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->cfg->getAll())) . " levels loaded!");
         $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
-    }
-
-    public function joinTimer(string $name) {
-
     }
 
     public function joinText(string $name) {
