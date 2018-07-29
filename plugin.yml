@@ -2,10 +2,14 @@ name: PvPLevels
 author: corytortoise
 main: corytortoise\PvPLevels\Main
 version: "1.0"
-api: [2.0.0, 3.0.0-ALPHA9, 3.0.0-ALPHA11, 3.0.3]
+api: [2.0.0, 3.0.0-ALPHA9, 3.0.0-ALPHA11, 3.0.3, 3.1.1]
 description: Stores PvP stats and enables leveling for kills.
 
 commands:
   pvpstats:
     description: Shows PvP Statistics
     usage: /pvpstats [player]
+  pvptext:
+    description: Creates a floating text leaderboard for PvP Stats at your location.
+    usage: /pvptext <levels | kills | kdr | streaks>
+    permission: pvplevels.pvptext

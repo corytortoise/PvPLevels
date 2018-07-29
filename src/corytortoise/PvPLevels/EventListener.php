@@ -3,9 +3,10 @@
 namespace corytortoise\PvPLevels;
 
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerDeathEvent;
-use pocketmine\event\entity\{EntityDamageEvent, EntityDamageByEntityEvent};
-use pocketmine\{Server, Player};
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\Player;
 
 class EventListener implements Listener {
 
@@ -15,11 +16,15 @@ class EventListener implements Listener {
     public function __construct(Main $plugin) {
         $this->plugin = $plugin;
     }
-    
+
+    public function onJoin(PlayerJoinEvent $e) {
+        $this->plugin->joinText($e->getPlayer()->getName());
+    }
+
     /**
-     * 
+     *
      * @param PlayerDeathEvent $e
-     * 
+     *
      */
     public function onDeath(PlayerDeathEvent $e) {
         $v = $e->getPlayer();

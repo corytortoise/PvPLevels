@@ -1,5 +1,19 @@
 #Config File for PvPLevels
 ---
+
+#Floating Texts
+#Set world to what world you want the texts to spawn in. Currently only supports one world.
+texts:
+  world: "world"
+
+#Set title to whatever text you want to display at the top of the floating text for each statistic. Use "&" for colors.
+  levels: "&b< PvP Levels Leaderboard >"
+  kills: "&b< Kills Leaderboard >"
+  kdr: "&b< K/D Ratio Leaderboard >"
+  streaks: "&b< Top Killstreaks >"
+#Top X rankings. If you put 5, only the top 5 will be shown. 10 will result in top 10, etc.
+  top: 5
+
 #Format:
 # Level Number:
 #   kills: number of kills required
@@ -28,4 +42,3 @@
   kills: 10
   commands:
   - "say %p got 10 kills"
----
