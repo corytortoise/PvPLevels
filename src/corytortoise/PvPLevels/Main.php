@@ -33,15 +33,15 @@ class Main extends PluginBase {
         $this->texts = new Config($this->getDataFolder() . "texts.yml", Config::YAML);
         $listener = new EventListener($this);
         $this->getServer()->getPluginManager()->registerEvents($listener, $this);
-        $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->cfg->getAll())) . " levels loaded!");
-        $this->getLogger()->notice(C::GOLD ."PvPLevels: " . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
+        $this->getLogger()->notice(C::GOLD . count(array_keys($this->cfg->getAll())) . " levels loaded!");
+        $this->getLogger()->notice(C::GOLD . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
     }
 
     public function joinText(string $name) {
         foreach($this->texts->getAll() as $loc => $type) {
         $pos = explode("_", $loc);
             if(isset($pos[1])) {
-                $v3 = new Vector3($pos[0], $pos[1], $pos[2]);
+                $v3 = new Vector3((float) $pos[0],(float) $pos[1],(float) $pos[2]);
                 $this->createText($v3, $type, [$this->getServer()->getPlayerExact($name)]);
             }
         }
@@ -157,7 +157,7 @@ class Main extends PluginBase {
             if($sender instanceof Player) {
                 if(isset($args[0])) {
                     if(in_array($args[0], ["levels", "kills", "kdr", "streaks"])) {
-                        $v3 = implode("_", [round($sender->getX()), round($sender->getY()) + 1, round($sender->getZ())]);
+                        $v3 = implode("_", [round($sender->getX(), 2), round($sender->getY(), 2) + 1.7, round($sender->getZ(), 2)]);
                         $this->texts->set($v3, $args[0]);
                         $this->texts->save();
                         $v3 = $sender->asVector3();
@@ -166,14 +166,21 @@ class Main extends PluginBase {
                         return true;
                     } elseif(in_array($args[0], ["del", "remove", "delete"])) {
                         $text = $this->isNearText($sender);
-                        if($this->particles[$text] instanceof FloatingTextParticle) {
-                            $this->particles[$text]->setInvisible();
-                            $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addParticle($this->particles[$text], [$sender]);
-                            $this->texts->remove($text);
-                            $this->texts->save();
-                            unset($this->particles[$text]);
-                            $sender->sendMessage(C::GOLD . "Floating Text removed.");
-                            return true;
+                        if(isset($this->particles[$text])) {
+                            if($this->particles[$text] instanceof FloatingTextParticle) {
+                                $this->particles[$text]->setInvisible();
+                                $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addParticle($this->particles[$text], [$sender]);
+                                $this->texts->remove($text);
+                                $this->texts->save();
+                                if(isset($this->particles[$text])) {
+                                    unset($this->particles[$text]);
+                                }
+                                $sender->sendMessage(C::GOLD . "Floating Text removed.");
+                                return true;
+                            } else {
+                                $sender->sendMessage(C::RED . "Floating Text not found.");
+                                return true;
+                            }
                         } else {
                             $sender->sendMessage(C::RED . "Floating Text not found.");
                             return true;
@@ -199,7 +206,7 @@ class Main extends PluginBase {
             $v3 = explode("_", $loc);
             if(isset($v3[1])) {
                 $text = new Vector3($v3[0], $v3[1], $v3[2]);
-                if($player->distance($text) <= 5) {
+                if($player->distance($text) <= 5 && $player->distance($text) > 0) {
                     return $loc;
                 }
             }

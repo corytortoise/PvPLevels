@@ -23,16 +23,8 @@ class PlayerData {
             $data = yaml_parse_file($path);
             $this->data = $data;
             $this->kills = $data["kills"];
-            if(isset($data["killstreak"])) {
-                $this->killStreak = $data["killstreak"];
-            } else {
-                $this->killStreak = 0;
-            }
-            if(isset($data["kdr"])) {
-                $this->kdr = $data["kdr"];
-            } else {
-                $this->kdr = 0;
-            }
+            $this->killStreak = $data["killstreak"] ?? 0;
+            $this->kdr = $data["kdr"] ?? 0;
             $this->deaths = $data["deaths"];
             $this->level = $data["level"];
         } else {
