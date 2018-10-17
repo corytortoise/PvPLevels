@@ -13,3 +13,8 @@ commands:
     description: Creates a floating text leaderboard for PvP Stats at your location.
     usage: /pvptext <levels | kills | kdr | streaks>
     permission: pvplevels.pvptext
+    
+permissions:
+  pvplevels.pvptext:
+      default: false
+      description: "Allows creation of Floating Texts"

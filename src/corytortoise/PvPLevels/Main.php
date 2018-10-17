@@ -33,6 +33,10 @@ class Main extends PluginBase {
         $this->texts = new Config($this->getDataFolder() . "texts.yml", Config::YAML);
         $listener = new EventListener($this);
         $this->getServer()->getPluginManager()->registerEvents($listener, $this);
+        if(!$this->cfg->get("timer") == false) {
+            $interval = $this->cfg->get("timer") ?? 60;
+            $this->getScheduler()->scheduleDelayedRepeatingTask(new UpdateTask($this), $interval * 20, $interval * 20);
+        }
         $this->getLogger()->notice(C::GOLD . count(array_keys($this->cfg->getAll())) . " levels loaded!");
         $this->getLogger()->notice(C::GOLD . count(array_keys($this->texts->getAll())) . " floating texts loaded!");
     }
@@ -41,7 +45,7 @@ class Main extends PluginBase {
         foreach($this->texts->getAll() as $loc => $type) {
         $pos = explode("_", $loc);
             if(isset($pos[1])) {
-                $v3 = new Vector3((float) $pos[0],(float) $pos[1],(float) $pos[2]);
+                $v3 = new Vector3(round($pos[0], 2),round($pos[1], 2),round($pos[2], 2));
                 $this->createText($v3, $type, [$this->getServer()->getPlayerExact($name)]);
             }
         }
@@ -58,6 +62,14 @@ class Main extends PluginBase {
         $id = implode("_", [$location->getX(), $location->getY(), $location->getZ()]);
         $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addParticle($particle = new FloatingTextParticle($location, C::GOLD . "<<<<<>>>>>", $typetitle . "\n" . $this->getRankings($type)), $players);
         $this->particles[$id] = $particle;
+    }
+
+    public function updateTexts() {
+        foreach($this->particles as $id => $text) {
+            $type = $this->texts->get($id);
+            $typetitle = $this->colorize($this->getConfig()->get("texts")[$type]);
+            $text->setText(C::GOLD . "<<<<<>>>>>", $typetitle . "\n" . $this->getRankings($type));
+        }
     }
 
     /**
@@ -77,7 +89,7 @@ class Main extends PluginBase {
                 $player->sendPopup(C::GREEN . "Level up");
                 $data->levelUp();
                 foreach($level["commands"] as $command) {
-                    $cmd = str_replace(["%p", "%k", "%s", "%d", "%kdr", "%l"], [$player->getName(), $data->getKills(), $data->getStreak(), $data->getDeaths(), $data->getKdr(), $data->getLevel()], $command);
+                    $cmd = str_replace(["%p", "%k", "%s", "%d", "%kdr", "%l"], ["\"$player->getName()\"", $data->getKills(), $data->getStreak(), $data->getDeaths(), $data->getKdr(), $data->getLevel()], $command);
                     $this->getServer()->dispatchCommand(new ConsoleCommandSender(), $cmd);
                 }
             }

@@ -5,6 +5,8 @@
 #Set world to what world you want the texts to spawn in. Currently only supports one world.
 texts:
   world: "world"
+  #How frequently in seconds Floating Texts should update. Set to false to turn off timer.
+  timer: 30
 
 #Set title to whatever text you want to display at the top of the floating text for each statistic. Use "&" for colors.
   levels: "&b< PvP Levels Leaderboard >"
