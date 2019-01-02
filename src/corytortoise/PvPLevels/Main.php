@@ -33,8 +33,8 @@ class Main extends PluginBase {
         $this->texts = new Config($this->getDataFolder() . "texts.yml", Config::YAML);
         $listener = new EventListener($this);
         $this->getServer()->getPluginManager()->registerEvents($listener, $this);
-        if(!$this->cfg->get("timer") == false) {
-            $interval = $this->cfg->get("timer") ?? 60;
+        if(!$this->cfg->get("texts")["timer"] === false) {
+            $interval = $this->cfg->get("texts")["timer"] ?? 60;
             $this->getScheduler()->scheduleDelayedRepeatingTask(new UpdateTask($this), $interval * 20, $interval * 20);
         }
         $this->getLogger()->notice(C::GOLD . count(array_keys($this->cfg->getAll())) . " levels loaded!");
@@ -172,8 +172,7 @@ class Main extends PluginBase {
                         $v3 = implode("_", [round($sender->getX(), 2), round($sender->getY(), 2) + 1.7, round($sender->getZ(), 2)]);
                         $this->texts->set($v3, $args[0]);
                         $this->texts->save();
-                        $v3 = $sender->asVector3();
-                        $this->createText($v3, $args[0], null);
+                        $this->createText(new Vector3(round($sender->getX(), 2), round($sender->getY(), 2) + 1.7, round($sender->getZ(), 2)), $args[0], null);
                         $sender->sendMessage(C::GRAY . "[" . C::GOLD . "PvP" . C::YELLOW . "Stats" . C::GRAY . "] \n" . C::GREEN . $args[0] . " leaderboard created!");
                         return true;
                     } elseif(in_array($args[0], ["del", "remove", "delete"])) {
