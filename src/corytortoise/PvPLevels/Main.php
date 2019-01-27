@@ -156,7 +156,6 @@ class Main extends PluginBase {
                         return true;
                     }
                 } else {
-                    $this->addKill($sender);
                     $data = $this->getData($sender->getName());
                     $name = $sender->getName();
                 }
