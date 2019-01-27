@@ -68,7 +68,8 @@ class Main extends PluginBase {
         foreach($this->particles as $id => $text) {
             $type = $this->texts->get($id);
             $typetitle = $this->colorize($this->getConfig()->get("texts")[$type]);
-            $text->setText(C::GOLD . "<<<<<>>>>>", $typetitle . "\n" . $this->getRankings($type));
+            $text->setTitle(C::GOLD . $typetitle . "\n" . $this->getRankings($type));
+            $this->getServer()->getLevelByName($this->cfg->get("texts")["world"])->addParticle($text);
         }
     }
 
@@ -89,7 +90,7 @@ class Main extends PluginBase {
                 $player->sendPopup(C::GREEN . "Level up");
                 $data->levelUp();
                 foreach($level["commands"] as $command) {
-                    $cmd = str_replace(["%p", "%k", "%s", "%d", "%kdr", "%l"], ["\"$player->getName()\"", $data->getKills(), $data->getStreak(), $data->getDeaths(), $data->getKdr(), $data->getLevel()], $command);
+                    $cmd = str_replace(["%p", "%k", "%s", "%d", "%kdr", "%l"], ["\"" . $player->getName() . "\"", $data->getKills(), $data->getStreak(), $data->getDeaths(), $data->getKdr(), $data->getLevel()], $command);
                     $this->getServer()->dispatchCommand(new ConsoleCommandSender(), $cmd);
                 }
             }
@@ -155,6 +156,7 @@ class Main extends PluginBase {
                         return true;
                     }
                 } else {
+                    $this->addKill($sender);
                     $data = $this->getData($sender->getName());
                     $name = $sender->getName();
                 }
